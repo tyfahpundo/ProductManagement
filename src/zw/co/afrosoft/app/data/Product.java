@@ -2,10 +2,11 @@ package zw.co.afrosoft.app.data;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
 
 import static zw.co.afrosoft.app.data.Rating.*;
 
-public class Product {
+public abstract class Product {
     public static final BigDecimal DISCOUNT_RATE = BigDecimal.valueOf(0.1);
     private int id;
     private String name;
@@ -58,7 +59,29 @@ public class Product {
         return rating;
     }
 
-    public Product applyRating(Rating newRating){
-        return new Product(id,name,price,newRating);
+    public abstract Product applyRating(Rating newRating);
+
+    @Override
+    public String toString() {
+        return "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", rating=" + rating;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Product product = (Product) o;
+
+        if (id != product.id) return false;
+        return  Objects.equals(name, product.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }
