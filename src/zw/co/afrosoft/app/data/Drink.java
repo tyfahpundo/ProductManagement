@@ -3,9 +3,9 @@ package zw.co.afrosoft.app.data;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 
-public class Drink extends Product{
+public final class Drink extends Product{
 
-    public Drink(int id, String name, BigDecimal price, Rating rating){
+    Drink(int id, String name, BigDecimal price, Rating rating){
         super(id,name,price,rating);
 
     }

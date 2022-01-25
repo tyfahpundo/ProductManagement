@@ -2,6 +2,7 @@ package zw.co.afrosoft.app.data;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.Objects;
 
 import static zw.co.afrosoft.app.data.Rating.*;
@@ -13,18 +14,14 @@ public abstract class Product {
     private BigDecimal price;
     private Rating rating;
 
-    public Product() {
-        this(0,"no name",BigDecimal.ZERO);
-    }
-
-    public Product(int id, String name, BigDecimal price, Rating rating) {
+    Product(int id, String name, BigDecimal price, Rating rating) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.rating = rating;
     }
 
-    public Product(int id, String name, BigDecimal price) {
+    Product(int id, String name, BigDecimal price) {
         this(id,name,price,NOT_RATED);
     }
 
@@ -52,6 +49,7 @@ public abstract class Product {
 //        this.price = price;
 //    }
     public BigDecimal getDiscount(){
+
         return price.multiply(DISCOUNT_RATE).setScale(2, RoundingMode.HALF_UP);
     }
 
@@ -61,12 +59,17 @@ public abstract class Product {
 
     public abstract Product applyRating(Rating newRating);
 
+    public LocalDate getBestBefore() {
+        return LocalDate.now();
+    }
+
     @Override
     public String toString() {
-        return "id=" + id +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", rating=" + rating;
+        return "id= " + id +
+                ", name= '" + name + '\'' +
+                ", price= " + price +
+                ", rating= " + rating.getStars() +
+                ", bestBefore= " + getBestBefore();
     }
 
     @Override
