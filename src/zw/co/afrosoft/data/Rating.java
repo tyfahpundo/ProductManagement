@@ -1,4 +1,4 @@
-package zw.co.afrosoft.app.data;
+package zw.co.afrosoft.data;
 
 public enum Rating {
     NOT_RATED("\u2606\u2606\u2606\u2606\u2606"),

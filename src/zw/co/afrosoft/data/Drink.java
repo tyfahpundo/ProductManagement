@@ -1,4 +1,4 @@
-package zw.co.afrosoft.app.data;
+package zw.co.afrosoft.data;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
