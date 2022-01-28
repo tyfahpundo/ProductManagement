@@ -76,8 +76,11 @@ public abstract class Product implements Rateable<Product> {
 
         Product product = (Product) o;
 
-        if (id != product.id) return false;
-        return  Objects.equals(name, product.name);
+        if (id != product.id){
+            return false;
+        } else
+            return true;
+
     }
 
     @Override

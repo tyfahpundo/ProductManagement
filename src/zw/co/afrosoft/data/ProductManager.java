@@ -38,6 +38,9 @@ public class ProductManager {
         products.putIfAbsent(product, new ArrayList<>());
         return product;
     }
+    public Product reviewProduct(int id, Rating rating, String comments){
+        return reviewProduct(findProduct(id),rating,comments);
+    }
     public Product reviewProduct(Product product, Rating rating, String comments){
         List<Review> reviews = products.get(product);
         products.remove(product,reviews);
@@ -50,6 +53,19 @@ public class ProductManager {
         products.put(product,reviews);
         return product;
     }
+    public Product findProduct(int id){
+        Product result = null;
+        for(Product product : products.keySet()){
+            if(product.getId() == id){
+                result = product;
+                break;
+            }
+        }
+        return result;
+    }
+    public void printProductReport(int id){
+        printProductReport(findProduct(id));
+    }
     public void printProductReport(Product product){
         List<Review> reviews = products.get(product);
         StringBuilder txt = new StringBuilder();
@@ -60,6 +76,7 @@ public class ProductManager {
                 dateFormat.format(product.getBestBefore())
                 ));
         txt.append('\n');
+        Collections.sort(reviews);
         for (Review review : reviews){
             txt.append(MessageFormat.format(resources.getString("review"),
                     review.getRating().getStars(),
