@@ -35,13 +35,16 @@ public class Shop {
         pm.reviewProduct(103,Rating.ONE_STAR,"Sweet Cake");
         pm.reviewProduct(103,Rating.FIVE_STAR,"Yummy");
         pm.reviewProduct(103,Rating.FOUR_STAR,"Not fresh");
-//        pm.printProductReport(103);
+        pm.printProductReport(103);
+
+        pm.printProducts(p->p.getPrice().floatValue()<2, (p1,p2)-> p2.getRating().ordinal()-p1.getRating().ordinal());
+
         Comparator<Product> ratingSorter = (p1,p2) -> p2.getRating().ordinal() - p1.getRating().ordinal();
         Comparator<Product> priceSorter = (p1,p2) -> p2.getPrice().compareTo(p1.getPrice());
-        pm.printProducts(ratingSorter);
-        pm.printProducts(priceSorter);
+//        pm.printProducts(ratingSorter);
+//        pm.printProducts(priceSorter);
 
-        pm.printProducts(ratingSorter.thenComparing(priceSorter));
+//        pm.printProducts(ratingSorter.thenComparing(priceSorter));
 
 
 //        Product p4 = pm.createProduct(105,"Cookie",BigDecimal.valueOf(3.99),Rating.TWO_STAR,LocalDate.now());
