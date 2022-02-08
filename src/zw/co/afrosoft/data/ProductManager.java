@@ -1,6 +1,13 @@
 package zw.co.afrosoft.data;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -18,6 +25,10 @@ public class ProductManager {
     private ResourceFormatter formatter;
     private ResourceBundle config = ResourceBundle.getBundle("zw.co.afrosoft.data.config");
     private MessageFormat reviewFormat = new MessageFormat(config.getString("review.data.format"));
+    private Path reportsFolder = Path.of(config.getString("reports.folder"));
+    private Path dataFolder = Path.of(config.getString("data.folder"));
+    private Path tempFolder = Path.of(config.getString("temp.folder"));
+
     private MessageFormat productFormat = new MessageFormat(config.getString("product.data.format"));
     private static Map<String,ResourceFormatter> formatters =
             Map.of("en-GB", new ResourceFormatter(Locale.UK),
@@ -83,22 +94,24 @@ public class ProductManager {
             printProductReport(findProduct(id));
         } catch (ProductManagerException e) {
             log.info(e.getMessage());
+        } catch (IOException e) {
+            log.severe("Error printing product report "+ e.getMessage());
         }
     }
-    public void printProductReport(Product product){
+    public void printProductReport(Product product) throws IOException{
         List<Review> reviews = products.get(product);
-        StringBuilder txt = new StringBuilder();
-        txt.append(formatter.formatProduct(product));
-        txt.append('\n');
-        Collections.sort(reviews);
-        if(reviews.isEmpty()) {
-            txt.append(formatter.getText("no.reviews")).append('\n');
-        }else{
-            txt.append(reviews.stream()
-                    .map(review -> formatter.formatReview(review)+ '\n')
-                    .collect(Collectors.joining()));
+        Path productFile = reportsFolder.resolve(MessageFormat.format(config.getString("report.file"),product.getId()));
+        try(PrintWriter out = new PrintWriter(new OutputStreamWriter(Files.newOutputStream(productFile, StandardOpenOption.CREATE),"UTF-8"))){
+            out.append(formatter.formatProduct(product)+ System.lineSeparator());
+            Collections.sort(reviews);
+            if(reviews.isEmpty()) {
+                out.append(formatter.getText("no.reviews")+ System.lineSeparator());
+            }else{
+                out.append(reviews.stream()
+                        .map(review -> formatter.formatReview(review)+ System.lineSeparator())
+                        .collect(Collectors.joining()));
+            }
         }
-        System.out.println(txt);
     }
     public void parseReview(String txt){
         try {
