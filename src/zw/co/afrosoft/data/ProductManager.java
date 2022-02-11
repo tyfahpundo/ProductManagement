@@ -1,9 +1,6 @@
 package zw.co.afrosoft.data;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +10,7 @@ import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -126,6 +124,20 @@ public class ProductManager {
         }
         return review;
     }
+    private void dumpData(){
+        try{
+            if(Files.notExists(tempFolder)){
+                Files.createDirectory(tempFolder);
+            }
+            Path tempFile = tempFolder.resolve(MessageFormat.format(config.getString("temp.file"), Instant.now()));
+            try(ObjectOutputStream out = new ObjectOutputStream(Files.newOutputStream(tempFile,StandardOpenOption.CREATE))){
+                out.writeObject(products);
+                products = new HashMap<>();
+            }
+        } catch (IOException e) {
+            log.severe("Error While dumping data "+ e.getMessage());
+        }
+    }
     private void loadAllData(){
         try {
             products = Files.list(dataFolder)
@@ -135,7 +147,7 @@ public class ProductManager {
                     .collect(Collectors.toMap(product -> product,
                             this::loadReviews));
         } catch (IOException e) {
-            log.severe("Error loading data "+ e.getMessage());
+            log.severe("Error while loading data "+ e.getMessage());
         }
     }
     private Product loadProduct(Path file){
