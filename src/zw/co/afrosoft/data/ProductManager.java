@@ -138,6 +138,19 @@ public class ProductManager {
             log.severe("Error While dumping data "+ e.getMessage());
         }
     }
+    @SuppressWarnings("unchecked")
+    private void restoreData(){
+        try{
+            Path tempFile = Files.list(tempFolder)
+                    .filter(path -> path.getFileName().toString().endsWith("tmp"))
+                    .findFirst().orElseThrow();
+            try(ObjectInputStream in = new ObjectInputStream(Files.newInputStream(tempFile, StandardOpenOption.DELETE_ON_CLOSE))){
+                products = (HashMap) in.readObject();
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            log.severe("Error while loading data "+e.getMessage());
+        }
+    }
     private void loadAllData(){
         try {
             products = Files.list(dataFolder)
