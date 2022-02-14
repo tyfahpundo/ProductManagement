@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class ProductManager {
     private Map<Product, List<Review>> products = new HashMap<>();
-    private ResourceFormatter formatter;
+//    private ResourceFormatter formatter;
     private ResourceBundle config = ResourceBundle.getBundle("zw.co.afrosoft.data.config");
     private MessageFormat reviewFormat = new MessageFormat(config.getString("review.data.format"));
     private Path reportsFolder = Path.of(config.getString("reports.folder"));
@@ -34,19 +34,16 @@ public class ProductManager {
             Map.of("en-GB", new ResourceFormatter(Locale.UK),
                     "en-US", new ResourceFormatter(Locale.US));
     private static final Logger log = Logger.getLogger(ProductManager.class.getName());
-    public ProductManager() {
+    private static final ProductManager pm = new ProductManager();
+
+    public static ProductManager getInstance(){
+        return pm;
     }
 
-    public ProductManager(Locale locale) {
-        this(locale.toLanguageTag());
-    }
-    public ProductManager(String languageTag) {
-        changeLocale(languageTag);
+    private ProductManager() {
         loadAllData();
     }
-    public void changeLocale(String languageTag){
-        formatter = formatters.getOrDefault(languageTag,formatters.get("en-GB"));
-    }
+
     public static Set<String> getSupportedLocales(){
         return formatters.keySet();
     }
@@ -90,16 +87,17 @@ public class ProductManager {
                 .findFirst()
                 .orElseThrow(()-> new ProductManagerException("Product with id "+id+" not found!"));
     }
-    public void printProductReport(int id){
+    public void printProductReport(int id,String languageTag){
         try {
-            printProductReport(findProduct(id));
+            printProductReport(findProduct(id),languageTag);
         } catch (ProductManagerException e) {
             log.info(e.getMessage());
         } catch (IOException e) {
             log.severe("Error printing product report "+ e.getMessage());
         }
     }
-    public void printProductReport(Product product) throws IOException{
+    public void printProductReport(Product product,String languageTag) throws IOException{
+        ResourceFormatter formatter = formatters.getOrDefault(languageTag,formatters.get("en-GB"));
         List<Review> reviews = products.get(product);
         Path productFile = reportsFolder.resolve(MessageFormat.format(config.getString("report.file"),product.getId()));
         try(PrintWriter out = new PrintWriter(new OutputStreamWriter(Files.newOutputStream(productFile, StandardOpenOption.CREATE),"UTF-8"))){
@@ -211,13 +209,24 @@ public class ProductManager {
         }
         return product;
     }
-    public void printProducts(Predicate<Product> filter, Comparator<Product> sorter){
+    public void printProducts(Predicate<Product> filter, Comparator<Product> sorter, String languageTag){
+        ResourceFormatter formatter = formatters.getOrDefault(languageTag,formatters.get("en-US"));
         StringBuilder txt = new StringBuilder();
         products.keySet().stream()
                 .sorted(sorter)
                 .filter(filter)
                 .forEach(product -> txt.append(formatter.formatProduct(product) + '\n'));
         System.out.println(txt);
+    }
+    public Map<String, String> getDiscounts(String languageTag){
+        ResourceFormatter formatter = formatters.getOrDefault(languageTag,formatters.get("en-US"));
+        return products.keySet()
+                .stream()
+                .collect(
+                        Collectors.groupingBy(product -> product.getRating().getStars(),
+                                Collectors.collectingAndThen(Collectors.summingDouble(product -> product.getDiscount().doubleValue()),
+                                        discount -> formatter.moneyFormat.format(discount)))
+                );
     }
 
     private static class ResourceFormatter{
